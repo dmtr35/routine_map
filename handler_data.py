@@ -1,16 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 import datetime, calendar
-from month_grid import month_grid, today
+from month_grid import month_grid, today, date
+from work_with_data import load_data, add_date, delete_date
+import config
 
 
+def get_bg_color(cell, month_type, data):
+    date_str = date(cell)
 
-def get_bg_color(grid, data, row, col):
-    cell = grid[row][col]
-    month_type = cell["month_type"]
-    print(data)
-    date_str = f"{cell['year']:04d}-{cell['month']:02d}-{cell['day']:02d}"
-    print(date_str)
     if month_type == "other" and date_str in data:
         bg="LightCoral"
     elif month_type == "current" and date_str in data:
@@ -22,10 +20,16 @@ def get_bg_color(grid, data, row, col):
 
     return bg
 
-def handler_data(left_frame, cal_frame, data):
+# def purgatory():
+
+
+def handler_data(left_frame, cal_frame, full_data):
+    # full_data = load_data()
     list_frames_labels = []
-    for row, key in enumerate(data):
-        frame = tk.Frame(left_frame, 
+    # key_data = ""
+    for row, key in enumerate(full_data):
+        frame = tk.Frame(
+            left_frame, 
             width=250, 
             height=40,
             relief="solid",
@@ -39,10 +43,10 @@ def handler_data(left_frame, cal_frame, data):
         lbl.pack(expand=True, fill="both")
 
         if row == 0:
-            load_cal(cal_frame, data[key])
+            load_cal(cal_frame, key, full_data[key], full_data)
 
         list_frames_labels.append((frame, lbl))
-        def on_click(event, f=frame, l=lbl, d=data[key]):
+        def on_click(event, f=frame, l=lbl, key=key, data=full_data[key], full_data=full_data):
             for fr, lb in list_frames_labels:
                 fr.config(bg="LightSlateGray")
                 lb.config(bg="LightSlateGray")
@@ -50,21 +54,24 @@ def handler_data(left_frame, cal_frame, data):
             if f["bg"] == "LightSlateGray":
                 f.config(bg="RosyBrown")
                 l.config(bg="RosyBrown")
-                load_cal(cal_frame, d)
+                load_cal(cal_frame, key, data, full_data)
 
         # Bind click event
         frame.bind("<Button-1>", on_click)
         lbl.bind("<Button-1>", on_click)
 
-def load_cal(cal_frame, data):
-    print(data)
-    grid = today()
+def load_cal(cal_frame, key, data, full_data):
+    config.key_data = key
+    print(config.key_data)
+    dates = today()
+    grid = month_grid(dates["year"], dates["month"])
     squares = []
     for row in range(1, 7):                                                     # 6 weeks
         row_cells = []
-        for col in range(7):                                                    # 7 days per week
-            bg = get_bg_color(grid, data, row-1, col)
-            month_type = grid[row-1][col]["month_type"]
+        for col in range(7):
+            cell = grid[row-1][col]                                                   # 7 days per week
+            month_type = cell["month_type"]
+            bg = get_bg_color(cell, month_type, data)
             frame = tk.Frame(
                 cal_frame,
                 width=150,
@@ -76,7 +83,7 @@ def load_cal(cal_frame, data):
             frame.grid(row=row, column=col)
             frame.pack_propagate(False)  # prevent child from resizing frame
 
-            day = grid[row-1][col]["day"]
+            day = cell["day"]
             lbl = tk.Label(frame,
                 text=day,
                 font=("Segoe UI", 20),
@@ -86,17 +93,21 @@ def load_cal(cal_frame, data):
             lbl.pack(expand=True, fill="both")
 
             # Function to toggle color
-            def on_click(event, f=frame, l=lbl):
+            def on_click(event, f=frame, l=lbl, c=cell, key=key, fd=full_data):
                 if f["bg"] == "LightGrey":
+                    add_date(c, key, fd)
                     f.config(bg="LightCoral")
                     l.config(bg="LightCoral")
                 elif f["bg"] == "Silver":
+                    add_date(c, key, fd)
                     f.config(bg="IndianRed")
                     l.config(bg="IndianRed")
                 elif f["bg"] == "LightCoral":
+                    delete_date(c, key, fd)
                     f.config(bg="LightGrey")
                     l.config(bg="LightGrey")
                 elif f["bg"] == "IndianRed":
+                    delete_date(c, key, fd)
                     f.config(bg="Silver")
                     l.config(bg="Silver")
 

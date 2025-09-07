@@ -1,8 +1,24 @@
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
-from work_with_data import load_data, save_data
-from handler_data import handler_data
+from work_with_data import load_data, add_date
+from handler_data import handler_data, load_cal
+from month_grid import month_grid, today, date
+import config
+
+# dates = today()
+# class all_dates():
+#     year = dates["year"]
+#     month = dates["month"]
+#     month_name = dates["month_name"]
+#     next_year = dates["next_year"]
+#     next_month = dates["next_month"]
+#     next_month_name = dates["next_month_name"]
+#     prev_year = dates["prev_year"]
+#     prev_month = dates["prev_month"]
+#     prev_month_name = dates["prev_month_name"]
+
+
 
 
 root = tk.Tk()
@@ -34,11 +50,15 @@ for col, day in enumerate(weekdays):
     blb.pack(expand=True, fill="both")
 
 
-data = load_data()
-handler_data(left_frame, cal_frame, data)
+full_data = load_data()
+handler_data(left_frame, cal_frame, full_data)
 
 
-prev_btn = ttk.Button(cal_frame, text="<< Prev")
+prev_btn = ttk.Button(
+    cal_frame, 
+    text="<< Prev", 
+    command=lambda: load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data)
+)
 prev_btn.grid(row=7, column=1, columnspan=1, pady=10)
 
 month_btn = ttk.Button(cal_frame, text="may")

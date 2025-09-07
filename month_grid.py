@@ -71,5 +71,38 @@ def today():
     year = today.year
     month = today.month
     month_name = calendar.month_name[month]
-    grid = month_grid(year, month)
-    return grid
+
+    # next month
+    if month == 12:  # December → next January
+        next_month = 1
+        next_year = year + 1
+    else:
+        next_month = month + 1
+        next_year = year
+    next_month_name = calendar.month_name[next_month]
+
+    # previous month
+    if month == 1:  # January → prev December
+        prev_month = 12
+        prev_year = year - 1
+    else:
+        prev_month = month - 1
+        prev_year = year
+    prev_month_name = calendar.month_name[prev_month]
+
+    all_dates = {
+        "year": year,
+        "month": month,
+        "month_name": month_name,
+        "next_year": next_year,
+        "next_month": next_month,
+        "next_month_name": next_month_name,
+        "prev_year": prev_year,
+        "prev_month": prev_month,
+        "prev_month_name": prev_month_name
+    }
+    return all_dates
+
+
+def date(cell):
+    return f"{cell['year']:04d}-{cell['month']:02d}-{cell['day']:02d}"

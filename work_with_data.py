@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from month_grid import date
 
 filename = Path("routine_data.json")
 
@@ -13,6 +14,15 @@ def load_data():
         return data
 
 
-def save_data(data):
+def add_date(cell, key, full_data):
+    date_str = date(cell)
+    full_data[key].append(date_str)
     with open(filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
+        json.dump(full_data, f, indent=4)
+
+
+def delete_date(cell, key, full_data):
+    date_str = date(cell)
+    full_data[key].remove(date_str)
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(full_data, f, indent=4)
