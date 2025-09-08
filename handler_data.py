@@ -1,10 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
-import datetime, calendar
 from month_grid import month_grid, today, date
-from work_with_data import load_data, add_date, delete_date
+from work_with_data import add_date, delete_date
 import config
 
+months = [
+    "January", "February", "March", "April",
+    "May", "June", "July", "August",
+    "September", "October", "November", "December"
+]
 
 def get_bg_color(cell, month_type, data):
     date_str = date(cell)
@@ -20,10 +24,8 @@ def get_bg_color(cell, month_type, data):
 
     return bg
 
-# def purgatory():
 
-
-def handler_data(left_frame, cal_frame, full_data):
+def handler_data(left_frame, cal_frame, full_data, dates):
     # full_data = load_data()
     list_frames_labels = []
     # key_data = ""
@@ -43,10 +45,10 @@ def handler_data(left_frame, cal_frame, full_data):
         lbl.pack(expand=True, fill="both")
 
         if row == 0:
-            load_cal(cal_frame, key, full_data[key], full_data)
+            load_cal(cal_frame, key, full_data[key], full_data, dates)
 
         list_frames_labels.append((frame, lbl))
-        def on_click(event, f=frame, l=lbl, key=key, data=full_data[key], full_data=full_data):
+        def on_click(event, f=frame, l=lbl, key=key, data=full_data[key], full_data=full_data, dates=dates):
             for fr, lb in list_frames_labels:
                 fr.config(bg="LightSlateGray")
                 lb.config(bg="LightSlateGray")
@@ -54,16 +56,19 @@ def handler_data(left_frame, cal_frame, full_data):
             if f["bg"] == "LightSlateGray":
                 f.config(bg="RosyBrown")
                 l.config(bg="RosyBrown")
-                load_cal(cal_frame, key, data, full_data)
+                load_cal(cal_frame, key, data, full_data, dates)
+                # config.dates = today(config.dates["year"], month_number)
+                drop_down_month(cal_frame, full_data[config.key_data], full_data, dates)
+
 
         # Bind click event
         frame.bind("<Button-1>", on_click)
         lbl.bind("<Button-1>", on_click)
 
-def load_cal(cal_frame, key, data, full_data):
+def load_cal(cal_frame, key, data, full_data, dates):
     config.key_data = key
     print(config.key_data)
-    dates = today()
+    # dates = today()
     grid = month_grid(dates["year"], dates["month"])
     squares = []
     for row in range(1, 7):                                                     # 6 weeks
@@ -117,3 +122,21 @@ def load_cal(cal_frame, key, data, full_data):
 
             row_cells.append(lbl)
         squares.append(row_cells)
+
+
+def on_month_selected(event, combo, cal_frame, data, full_data):
+    selected_month = combo.get()
+    month_number = months.index(selected_month) + 1
+    print("User selected:", month_number)
+    config.dates = today(config.dates["year"], month_number)
+    load_cal(cal_frame, config.key_data, data, full_data, config.dates)
+
+def drop_down_month(cal_frame, data, full_data, dates=config.dates):
+    # create Combobox
+    combo = ttk.Combobox(cal_frame, values=months, state="readonly", width=9)
+    combo.current(dates["month"] - 1)                                # default value
+    combo.grid(row=7, column=2, columnspan=2, pady=10)
+
+    combo.bind("<<ComboboxSelected>>", lambda event: on_month_selected(event, combo, cal_frame, data, full_data))
+
+    # return combo

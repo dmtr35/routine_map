@@ -66,10 +66,10 @@ def month_grid(year, month):
     return grid
 
 
-def today():
-    today = datetime.date.today()
-    year = today.year
-    month = today.month
+def today(year, month):
+    # today = datetime.date.today()
+    # year = today.year
+    # month = today.month
     month_name = calendar.month_name[month]
 
     # next month
@@ -99,7 +99,7 @@ def today():
         "next_month_name": next_month_name,
         "prev_year": prev_year,
         "prev_month": prev_month,
-        "prev_month_name": prev_month_name
+        "prev_month_name": prev_month_name,
     }
     return all_dates
 

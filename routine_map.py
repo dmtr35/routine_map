@@ -1,24 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
-from work_with_data import load_data, add_date
-from handler_data import handler_data, load_cal
-from month_grid import month_grid, today, date
+from work_with_data import load_data
+from handler_data import handler_data, load_cal, drop_down_month
+from month_grid import today
 import config
-
-# dates = today()
-# class all_dates():
-#     year = dates["year"]
-#     month = dates["month"]
-#     month_name = dates["month_name"]
-#     next_year = dates["next_year"]
-#     next_month = dates["next_month"]
-#     next_month_name = dates["next_month_name"]
-#     prev_year = dates["prev_year"]
-#     prev_month = dates["prev_month"]
-#     prev_month_name = dates["prev_month_name"]
-
-
 
 
 root = tk.Tk()
@@ -51,23 +37,40 @@ for col, day in enumerate(weekdays):
 
 
 full_data = load_data()
-handler_data(left_frame, cal_frame, full_data)
+handler_data(left_frame, cal_frame, full_data, config.dates)
 
+def update_and_load_prev():
+    config.dates = today(config.dates["prev_year"], config.dates["prev_month"])
+    drop_down_month(cal_frame, full_data[config.key_data], full_data)
+    print(config.dates["month_name"])
+    return load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data, config.dates)
+def update_and_load_next():
+    config.dates = today(config.dates["next_year"], config.dates["next_month"])
+    drop_down_month(cal_frame, full_data[config.key_data], full_data)
+    print(config.dates["month_name"])
+    return load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data, config.dates)
 
 prev_btn = ttk.Button(
     cal_frame, 
     text="<< Prev", 
-    command=lambda: load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data)
+    command = update_and_load_prev
 )
 prev_btn.grid(row=7, column=1, columnspan=1, pady=10)
 
-month_btn = ttk.Button(cal_frame, text="may")
-month_btn.grid(row=7, column=2, columnspan=2, pady=10)
+
+drop_down_month(cal_frame, full_data[config.key_data], full_data)
+
 year_btn = ttk.Button(cal_frame, text="2025")
 year_btn.grid(row=7, column=3, columnspan=2, pady=10)
 
-next_btn = ttk.Button(cal_frame, text="Next >>")
+next_btn = ttk.Button(
+    cal_frame, 
+    text="Next >>",
+    command = update_and_load_next
+)
 next_btn.grid(row=7, column=5, columnspan=1, pady=10)
 
 
 root.mainloop()
+
+
