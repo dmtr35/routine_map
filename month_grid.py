@@ -67,9 +67,6 @@ def month_grid(year, month):
 
 
 def today(year, month):
-    # today = datetime.date.today()
-    # year = today.year
-    # month = today.month
     month_name = calendar.month_name[month]
 
     # next month
@@ -106,3 +103,5 @@ def today(year, month):
 
 def date(cell):
     return f"{cell['year']:04d}-{cell['month']:02d}-{cell['day']:02d}"
+
+

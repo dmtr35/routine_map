@@ -1,11 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
+import datetime, calendar
 from work_with_data import load_data
-from handler_data import handler_data, load_cal, drop_down_month
+from handler_data import handler_data, load_cal, drop_down
 from month_grid import today
 import config
 
+# current_date = today(datetime.date.today().year, datetime.date.today().month)
+# CH_current_date = current_date
 
 root = tk.Tk()
 root.tk.call("tk", "appname", "routine_map")
@@ -37,18 +40,18 @@ for col, day in enumerate(weekdays):
 
 
 full_data = load_data()
-handler_data(left_frame, cal_frame, full_data, config.dates)
+handler_data(left_frame, cal_frame, full_data)
 
 def update_and_load_prev():
-    config.dates = today(config.dates["prev_year"], config.dates["prev_month"])
-    drop_down_month(cal_frame, full_data[config.key_data], full_data)
+    config.CH_current_date = today(config.CH_current_date["prev_year"], config.CH_current_date["prev_month"])
+    drop_down(cal_frame, full_data[config.key_data], full_data, config.CH_current_date)
     print(config.dates["month_name"])
-    return load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data, config.dates)
+    return load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data, config.CH_current_date)
 def update_and_load_next():
-    config.dates = today(config.dates["next_year"], config.dates["next_month"])
-    drop_down_month(cal_frame, full_data[config.key_data], full_data)
+    config.CH_current_date = today(config.CH_current_date["next_year"], config.CH_current_date["next_month"])
+    drop_down(cal_frame, full_data[config.key_data], full_data, config.CH_current_date)
     print(config.dates["month_name"])
-    return load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data, config.dates)
+    return load_cal(cal_frame, config.key_data, full_data[config.key_data], full_data, config.CH_current_date)
 
 prev_btn = ttk.Button(
     cal_frame, 
@@ -58,10 +61,10 @@ prev_btn = ttk.Button(
 prev_btn.grid(row=7, column=1, columnspan=1, pady=10)
 
 
-drop_down_month(cal_frame, full_data[config.key_data], full_data)
+drop_down(cal_frame, full_data[config.key_data], full_data, config.current_date)
 
-year_btn = ttk.Button(cal_frame, text="2025")
-year_btn.grid(row=7, column=3, columnspan=2, pady=10)
+# year_btn = ttk.Button(cal_frame, text="2025")
+# year_btn.grid(row=7, column=3, columnspan=2, pady=10)
 
 next_btn = ttk.Button(
     cal_frame, 
