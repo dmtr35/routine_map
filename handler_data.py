@@ -49,6 +49,9 @@ def handler_data(left_frame, cal_frame, full_data):
 
         list_frames_labels.append((frame, lbl))
         def on_click(event, f=frame, l=lbl, key=key, data=full_data[key], full_data=full_data, current_date=config.current_date):
+            if config.key_data == key:
+                return
+
             for fr, lb in list_frames_labels:
                 fr.config(bg="LightSlateGray")
                 lb.config(bg="LightSlateGray")
@@ -65,10 +68,10 @@ def handler_data(left_frame, cal_frame, full_data):
         frame.bind("<Button-1>", on_click)
         lbl.bind("<Button-1>", on_click)
 
-def load_cal(cal_frame, key, data, full_data, dates = config.CH_current_date):
+def load_cal(cal_frame, key, data, full_data, dates = None):
+    if dates is None:
+        dates = config.CH_current_date
     config.key_data = key
-    print(config.key_data)
-    # dates = today()
     grid = month_grid(dates["year"], dates["month"])
     squares = []
     for row in range(1, 7):                                                     # 6 weeks
@@ -129,34 +132,18 @@ def on_selected(event, combo, kind, cal_frame, data, full_data):
     if kind == "month":
         selected_month = combo.get()
         month_number = months.index(selected_month) + 1
-        print("User selected:", month_number)
-        config.CH_current_date["month"] = month_number
+        config.CH_current_date = today(config.CH_current_date["year"], month_number)
     elif kind == "year":
-        selected_year = combo.get()
-        print("User selected:", selected_year)
-        config.CH_current_date["year"] = selected_year
+        selected_year = int(combo.get())
+        config.CH_current_date = today(selected_year, config.CH_current_date["month"])
     
-    load_cal(cal_frame, config.key_data, data, full_data, config.CH_current_date)
-
-# def drop_down_month(cal_frame, data, full_data, dates = config.CH_current_date):
-#     combo = ttk.Combobox(cal_frame, values=months, state="readonly", width=9)
-#     print(dates["month"] - 1)
-#     combo.current(dates["month"] - 1)                                # default value
-#     combo.grid(row=7, column=2, columnspan=2, pady=10)
-
-#     combo.bind("<<ComboboxSelected>>", lambda event: on_selected(event, combo, cal_frame, data, full_data))
-
-# def drop_down_year(cal_frame, data, full_data, dates = config.CH_current_date):
-#     years = [str(year) for year in range(dates["year"] - 50, dates["year"] + 50)]
-#     combo = ttk.Combobox(cal_frame, values=years, state="readonly", width=9)
-#     current_index = years.index(str(dates["year"]))
-#     combo.current(current_index)                               # default value
-#     combo.grid(row=7, column=3, columnspan=2, pady=10)
-
-#     combo.bind("<<ComboboxSelected>>", lambda event: on_selected(event, combo, cal_frame, data, full_data))
+    load_cal(cal_frame, config.key_data, data, full_data)
 
 
-def drop_down(cal_frame, data, full_data, dates = config.CH_current_date):
+
+def drop_down(cal_frame, data, full_data, dates = None):
+    if dates is None:
+        dates = config.CH_current_date
     month_combo = ttk.Combobox(cal_frame, values=months, state="readonly", width=9)
     month_combo.current(dates["month"] - 1)                                # default value
     month_combo.grid(row=7, column=2, columnspan=2, pady=10)
