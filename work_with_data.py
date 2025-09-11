@@ -26,3 +26,8 @@ def delete_date(cell, key, full_data):
     full_data[key].remove(date_str)
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=4)
+
+def delete_row(key, full_data):
+    del full_data[key]
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(full_data, f, indent=4)

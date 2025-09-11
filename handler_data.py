@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from month_grid import month_grid, today, date
-from work_with_data import add_date, delete_date
+from work_with_data import add_date, delete_date, delete_row
 import config
 
 months = [
@@ -22,28 +22,34 @@ def get_bg_color(cell, month_type, data):
         bg="Silver"
     return bg
 
-def delete_item(key, full_data, win):
+def delete_item(key, left_frame, cal_frame, full_data, win):
+    delete_row(key, full_data)
     print("Delete:", key)
     win.destroy()
+    config.key_data = ""
+    print(config.key_data)
+    handler_data(left_frame, cal_frame, full_data)
 
-def rename_item(key, full_data, win):
+def rename_item(key, left_frame, cal_frame, full_data, win):
     print("Rename:", key)
 
-def move_up(key, full_data, win):
+def move_up(key, left_frame, cal_frame, full_data, win):
     print("Move up:", key)
+    win.destroy()
 
-def move_down(key, full_data, win):
+def move_down(key, left_frame, cal_frame, full_data, win):
     print("Move down:", key)
+    win.destroy()
 
-def on_right_click(event, key, full_data):
+def on_right_click(event, key, left_frame, cal_frame, full_data):
     win = tk.Toplevel()
     win.title("menu")
     win.geometry("200x120")
 
-    tk.Button(win, text="Delete", command=lambda: delete_item(key, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Rename", command=lambda: rename_item(key, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Move_up", command=lambda: move_up(key, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Move_down", command=lambda: move_down(key, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Delete", command=lambda: delete_item(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Rename", command=lambda: rename_item(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Move_up", command=lambda: move_up(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Move_down", command=lambda: move_down(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
 
 def handler_data(left_frame, cal_frame, full_data):
     list_frames_labels = []
@@ -83,8 +89,8 @@ def handler_data(left_frame, cal_frame, full_data):
         # Bind click event
         frame.bind("<Button-1>", on_click)
         lbl.bind("<Button-1>", on_click)
-        frame.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, full_data))
-        lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, full_data))
+        frame.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, left_frame, cal_frame, full_data))
+        lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, left_frame, cal_frame, full_data))
 
 
 def load_cal(cal_frame, key, full_data, dates = None):
