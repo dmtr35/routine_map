@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from month_grid import month_grid, today, date
-from work_with_data import add_date, delete_date, delete_row
+from work_with_data import add_date, delete_date, delete_row, move_up_row, move_down_row, rename_row, add_row
 import config
 
 months = [
@@ -23,23 +23,84 @@ def get_bg_color(cell, month_type, data):
     return bg
 
 def delete_item(key, left_frame, cal_frame, full_data, win):
-    delete_row(key, full_data)
-    print("Delete:", key)
     win.destroy()
-    config.key_data = ""
-    print(config.key_data)
+    delete_row(key, full_data)
     handler_data(left_frame, cal_frame, full_data)
 
 def rename_item(key, left_frame, cal_frame, full_data, win):
-    print("Rename:", key)
+    win.destroy()
+
+    rename_win = tk.Toplevel()
+    rename_win.title("Rename item")
+    rename_win.geometry("250x100")
+
+    tk.Label(rename_win, text=f"Rename '{key}' to:").pack(pady=5)
+
+    entry = tk.Entry(rename_win)
+    entry.pack(fill="x", padx=10)
+    entry.insert(0, key)
+
+    def confirm_rename():
+        new_key = entry.get().strip()
+        rename_win.destroy()
+        
+        new_data = rename_row(new_key, key, full_data)
+        if not new_data:
+            return
+        
+        full_data.clear()
+        full_data.update(new_data)
+        
+        handler_data(left_frame, cal_frame, full_data)
+        
+    entry.bind("<Return>", lambda event: confirm_rename())                          # main enter
+    entry.bind("<KP_Enter>", lambda event: confirm_rename())                        # second enter
+    tk.Button(rename_win, text="rename", command=confirm_rename).pack(pady=10)
 
 def move_up(key, left_frame, cal_frame, full_data, win):
-    print("Move up:", key)
     win.destroy()
+    if not (full_data := move_up_row(key, full_data)):
+        return
+    handler_data(left_frame, cal_frame, full_data)
 
 def move_down(key, left_frame, cal_frame, full_data, win):
-    print("Move down:", key)
     win.destroy()
+    if not (full_data := move_down_row(key, full_data)):
+        return
+    handler_data(left_frame, cal_frame, full_data)
+
+def add_item(key, left_frame, cal_frame, full_data, win):
+    win.destroy()
+    if not (full_data := move_down_row(key, full_data)):
+        return
+    handler_data(left_frame, cal_frame, full_data)
+
+
+def add_item(left_frame, cal_frame, full_data):
+    add_win = tk.Toplevel()
+    add_win.title("add item")
+    add_win.geometry("250x100")
+
+    tk.Label(add_win, text=f"Add new name").pack(pady=5)
+
+    entry = tk.Entry(add_win)
+    entry.pack(fill="x", padx=10)
+    # entry.insert(0, key)
+
+    def confirm_rename():
+        new_key = entry.get().strip()
+        add_win.destroy()
+        
+        full_data = add_row(new_key, full_data)
+        if not full_data:
+            return
+        
+        
+        handler_data(left_frame, cal_frame, full_data)
+        
+    entry.bind("<Return>", lambda event: confirm_rename())                          # main enter
+    entry.bind("<KP_Enter>", lambda event: confirm_rename())                        # second enter
+    tk.Button(add_win, text="rename", command=confirm_rename).pack(pady=10)
 
 def on_right_click(event, key, left_frame, cal_frame, full_data):
     win = tk.Toplevel()
@@ -52,6 +113,9 @@ def on_right_click(event, key, left_frame, cal_frame, full_data):
     tk.Button(win, text="Move_down", command=lambda: move_down(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
 
 def handler_data(left_frame, cal_frame, full_data):
+    for widget in left_frame.winfo_children():
+        widget.destroy()
+    
     list_frames_labels = []
     for row, key in enumerate(full_data):
         frame = tk.Frame(
@@ -91,7 +155,15 @@ def handler_data(left_frame, cal_frame, full_data):
         lbl.bind("<Button-1>", on_click)
         frame.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, left_frame, cal_frame, full_data))
         lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, left_frame, cal_frame, full_data))
+    
 
+    left_frame.rowconfigure(len(full_data), weight=1)  # add empty space to push button down
+    add_btn = ttk.Button(
+        left_frame,
+        text="Add",
+        command=lambda: add_item(left_frame, cal_frame, full_data)
+    )
+    add_btn.grid(row=len(full_data)+1, column=0, pady=5, sticky="sew")
 
 def load_cal(cal_frame, key, full_data, dates = None):
     if dates is None:

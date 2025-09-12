@@ -67,8 +67,6 @@ def month_grid(year, month):
 
 
 def today(year, month):
-    print(month)
-    print(year)
     month_name = calendar.month_name[month]
 
     # next month
