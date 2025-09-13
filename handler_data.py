@@ -87,20 +87,22 @@ def add_item(left_frame, cal_frame, full_data):
     entry.pack(fill="x", padx=10)
     # entry.insert(0, key)
 
-    def confirm_rename():
+    def confirm_add():
         new_key = entry.get().strip()
         add_win.destroy()
         
-        full_data = add_row(new_key, full_data)
-        if not full_data:
+        # new_data = add_row(new_key, full_data)
+        if not add_row(new_key, full_data):
             return
         
+        # full_data.clear()
+        # full_data.update(new_data)
         
         handler_data(left_frame, cal_frame, full_data)
         
-    entry.bind("<Return>", lambda event: confirm_rename())                          # main enter
-    entry.bind("<KP_Enter>", lambda event: confirm_rename())                        # second enter
-    tk.Button(add_win, text="rename", command=confirm_rename).pack(pady=10)
+    entry.bind("<Return>", lambda event: confirm_add())                          # main enter
+    entry.bind("<KP_Enter>", lambda event: confirm_add())                        # second enter
+    tk.Button(add_win, text="add", command=confirm_add).pack(pady=10)
 
 def on_right_click(event, key, left_frame, cal_frame, full_data):
     win = tk.Toplevel()
@@ -115,6 +117,10 @@ def on_right_click(event, key, left_frame, cal_frame, full_data):
 def handler_data(left_frame, cal_frame, full_data):
     for widget in left_frame.winfo_children():
         widget.destroy()
+    for widget in cal_frame.winfo_children():
+        info = widget.grid_info()
+        if info["row"] != 0 and info["row"] != 7:
+            widget.destroy()
     
     list_frames_labels = []
     for row, key in enumerate(full_data):
@@ -126,8 +132,7 @@ def handler_data(left_frame, cal_frame, full_data):
             bd=1, 
             bg="RosyBrown" if row == 0 else "LightSlateGray"
         )
-        frame.grid(row=row, column=0)
-        frame.pack_propagate(False)
+        frame.pack(fill="x")
 
         lbl = tk.Label(frame, text=key, font=("segoe UI", 20), bg="RosyBrown" if row == 0 else "LightSlateGray")
         lbl.pack(expand=True, fill="both")
@@ -157,13 +162,12 @@ def handler_data(left_frame, cal_frame, full_data):
         lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, left_frame, cal_frame, full_data))
     
 
-    left_frame.rowconfigure(len(full_data), weight=1)  # add empty space to push button down
     add_btn = ttk.Button(
         left_frame,
         text="Add",
         command=lambda: add_item(left_frame, cal_frame, full_data)
     )
-    add_btn.grid(row=len(full_data)+1, column=0, pady=5, sticky="sew")
+    add_btn.pack(side="bottom", fill="x", pady=5)
 
 def load_cal(cal_frame, key, full_data, dates = None):
     if dates is None:
@@ -185,6 +189,7 @@ def load_cal(cal_frame, key, full_data, dates = None):
                 bd=2,
                 bg=bg
             )
+            # frame.pack(fill="x")
             frame.grid(row=row, column=col)
             frame.pack_propagate(False)  # prevent child from resizing frame
 

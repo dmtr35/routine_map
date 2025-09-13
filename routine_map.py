@@ -7,6 +7,31 @@ from handler_data import handler_data, load_cal, drop_down
 from month_grid import today
 import config
 
+def make_scrollable_frame(parent):
+    # контейнер
+    container = tk.Frame(parent)
+    container.pack(side="left", fill="both", expand=True)
+
+    # канва + скролл
+    canvas = tk.Canvas(container)
+    scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(
+            scrollregion=canvas.bbox("all")
+        )
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    return scrollable_frame
+
 
 root = tk.Tk()
 root.tk.call("tk", "appname", "routine_map")
@@ -26,6 +51,7 @@ left_frame.pack_propagate(False)                                            # pr
 # Right frame (3/4 width)
 cal_frame = ttk.Frame(main_frame, padding=10, relief="solid")
 cal_frame.pack(side="right", fill="both", expand=True)
+
 
 weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 for col, day in enumerate(weekdays):
