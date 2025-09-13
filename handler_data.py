@@ -117,7 +117,6 @@ def handler_data(scrollable_left, bottom_container, cal_frame, full_data):
     
     list_frames_labels = []
     for row, key in enumerate(full_data):
-        print(row)
         frame = tk.Frame(
             scrollable_left, 
             width=250, 
@@ -146,8 +145,9 @@ def handler_data(scrollable_left, bottom_container, cal_frame, full_data):
             if f["bg"] == "LightSlateGray":
                 f.config(bg="RosyBrown")
                 l.config(bg="RosyBrown")
+                config.CH_current_date = config.current_date
                 load_cal(cal_frame, key, full_data, current_date)
-                drop_down(cal_frame, full_data, config.current_date)
+                drop_down(cal_frame, full_data, current_date)
 
         # Bind click event
         frame.bind("<Button-1>", on_click)

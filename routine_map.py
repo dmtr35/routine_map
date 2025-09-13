@@ -20,7 +20,7 @@ main_frame = ttk.Frame(root, padding=10)                                    # in
 main_frame.pack(fill="both", expand=True)                                   # makes frame fill whole window.
 
 # Left frame (1/4 width)
-left_frame = ttk.Frame(main_frame, width=250, relief="solid")               # set frame’s width give the frame a simple border (flat rectangle).
+left_frame = ttk.Frame(main_frame, width=350, relief="solid")               # set frame’s width give the frame a simple border (flat rectangle).
 left_frame.pack(side="left", fill="y")                                      # dock it to the left / stretch vertically
 left_frame.pack_propagate(False)                                            # prevent auto-resizing when children are added.
 
