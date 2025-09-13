@@ -22,12 +22,12 @@ def get_bg_color(cell, month_type, data):
         bg="Silver"
     return bg
 
-def delete_item(key, left_frame, cal_frame, full_data, win):
+def delete_item(key, scroll_container, bottom_container, cal_frame, full_data, win):
     win.destroy()
     delete_row(key, full_data)
-    handler_data(left_frame, cal_frame, full_data)
+    handler_data(scroll_container, bottom_container, cal_frame, full_data)
 
-def rename_item(key, left_frame, cal_frame, full_data, win):
+def rename_item(key, scroll_container, bottom_container, cal_frame, full_data, win):
     win.destroy()
 
     rename_win = tk.Toplevel()
@@ -51,32 +51,26 @@ def rename_item(key, left_frame, cal_frame, full_data, win):
         full_data.clear()
         full_data.update(new_data)
         
-        handler_data(left_frame, cal_frame, full_data)
+        handler_data(scroll_container, bottom_container, cal_frame, full_data)
         
     entry.bind("<Return>", lambda event: confirm_rename())                          # main enter
     entry.bind("<KP_Enter>", lambda event: confirm_rename())                        # second enter
     tk.Button(rename_win, text="rename", command=confirm_rename).pack(pady=10)
 
-def move_up(key, left_frame, cal_frame, full_data, win):
+def move_up(key, scroll_container, bottom_container, cal_frame, full_data, win):
     win.destroy()
     if not (full_data := move_up_row(key, full_data)):
         return
-    handler_data(left_frame, cal_frame, full_data)
+    handler_data(scroll_container, bottom_container, cal_frame, full_data)
 
-def move_down(key, left_frame, cal_frame, full_data, win):
+def move_down(key, scroll_container, bottom_container, cal_frame, full_data, win):
     win.destroy()
     if not (full_data := move_down_row(key, full_data)):
         return
-    handler_data(left_frame, cal_frame, full_data)
-
-def add_item(key, left_frame, cal_frame, full_data, win):
-    win.destroy()
-    if not (full_data := move_down_row(key, full_data)):
-        return
-    handler_data(left_frame, cal_frame, full_data)
+    handler_data(scroll_container, bottom_container, cal_frame, full_data)
 
 
-def add_item(left_frame, cal_frame, full_data):
+def add_item(scroll_container, bottom_container, cal_frame, full_data):
     add_win = tk.Toplevel()
     add_win.title("add item")
     add_win.geometry("250x100")
@@ -85,47 +79,47 @@ def add_item(left_frame, cal_frame, full_data):
 
     entry = tk.Entry(add_win)
     entry.pack(fill="x", padx=10)
-    # entry.insert(0, key)
 
     def confirm_add():
         new_key = entry.get().strip()
         add_win.destroy()
         
-        # new_data = add_row(new_key, full_data)
         if not add_row(new_key, full_data):
             return
-        
-        # full_data.clear()
-        # full_data.update(new_data)
-        
-        handler_data(left_frame, cal_frame, full_data)
+        handler_data(scroll_container, bottom_container, cal_frame, full_data)
         
     entry.bind("<Return>", lambda event: confirm_add())                          # main enter
     entry.bind("<KP_Enter>", lambda event: confirm_add())                        # second enter
     tk.Button(add_win, text="add", command=confirm_add).pack(pady=10)
 
-def on_right_click(event, key, left_frame, cal_frame, full_data):
+def on_right_click(event, key, scroll_container, bottom_container, cal_frame, full_data):
     win = tk.Toplevel()
     win.title("menu")
     win.geometry("200x120")
 
-    tk.Button(win, text="Delete", command=lambda: delete_item(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Rename", command=lambda: rename_item(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Move_up", command=lambda: move_up(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Move_down", command=lambda: move_down(key, left_frame, cal_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Delete", command=lambda: delete_item(key, scroll_container, bottom_container, cal_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Rename", command=lambda: rename_item(key, scroll_container, bottom_container, cal_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Move_up", command=lambda: move_up(key, scroll_container, bottom_container, cal_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Move_down", command=lambda: move_down(key, scroll_container, bottom_container, cal_frame, full_data, win)).pack(fill="x")
 
-def handler_data(left_frame, cal_frame, full_data):
-    for widget in left_frame.winfo_children():
+
+
+def handler_data(scrollable_left, bottom_container, cal_frame, full_data):
+    for widget in scrollable_left.winfo_children():
+        widget.destroy()
+    for widget in bottom_container.winfo_children():
         widget.destroy()
     for widget in cal_frame.winfo_children():
         info = widget.grid_info()
         if info["row"] != 0 and info["row"] != 7:
             widget.destroy()
+
     
     list_frames_labels = []
     for row, key in enumerate(full_data):
+        print(row)
         frame = tk.Frame(
-            left_frame, 
+            scrollable_left, 
             width=250, 
             height=40,
             relief="solid",
@@ -158,16 +152,16 @@ def handler_data(left_frame, cal_frame, full_data):
         # Bind click event
         frame.bind("<Button-1>", on_click)
         lbl.bind("<Button-1>", on_click)
-        frame.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, left_frame, cal_frame, full_data))
-        lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, left_frame, cal_frame, full_data))
-    
+        frame.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, scrollable_left, bottom_container, cal_frame, full_data))
+        lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, scrollable_left, bottom_container, cal_frame, full_data))
 
     add_btn = ttk.Button(
-        left_frame,
+        bottom_container,
         text="Add",
-        command=lambda: add_item(left_frame, cal_frame, full_data)
+        command=lambda: add_item(scrollable_left, bottom_container, cal_frame, full_data)
     )
     add_btn.pack(side="bottom", fill="x", pady=5)
+
 
 def load_cal(cal_frame, key, full_data, dates = None):
     if dates is None:
@@ -189,7 +183,6 @@ def load_cal(cal_frame, key, full_data, dates = None):
                 bd=2,
                 bg=bg
             )
-            # frame.pack(fill="x")
             frame.grid(row=row, column=col)
             frame.pack_propagate(False)  # prevent child from resizing frame
 
