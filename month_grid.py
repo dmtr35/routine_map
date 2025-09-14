@@ -1,5 +1,32 @@
 import datetime, calendar
 
+import datetime
+
+def year_grid(year: int) -> dict[str, list[list[str]]]:
+    result = {}
+    for y in [year - 1, year]:
+        weeks = []
+        # start from Jan 1
+        start = datetime.date(y, 1, 1)
+        end = datetime.date(y, 12, 31)
+
+        # move back to Monday (ISO weekday: Monday=1, Sunday=7)
+        first_monday = start - datetime.timedelta(days=start.isoweekday() - 1)
+
+        current = first_monday
+        while current <= end:
+            week = []
+            for i in range(7):
+                day = current + datetime.timedelta(days=i)
+                if start <= day <= end:   # only keep days inside the year
+                    week.append(day.isoformat())
+            if week:  # skip empty weeks
+                weeks.append(week)
+            current += datetime.timedelta(days=7)
+
+        result[str(y)] = weeks
+    return result
+
 
 def month_grid(year, month):
     cal = calendar.Calendar(firstweekday=0)
