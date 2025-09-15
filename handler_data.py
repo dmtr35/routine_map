@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
-from month_grid import month_grid, year_grid, today, date
+from month_grid import month_grid, year_grid, today, date, months
 from work_with_data import add_date, delete_date, delete_row, move_up_row, move_down_row, rename_row, add_row
 import config
+from func_frames import make_scrollable_frame, reset_grid_columns, clear_frame
 
-months = [
+
+mons = [
     "January", "February", "March", "April",
     "May", "June", "July", "August",
     "September", "October", "November", "December"
@@ -34,12 +36,12 @@ def get_bg_color2(cell, month_type, data):
         bg="OliveDrab"
     return bg
 
-def delete_item(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win):
+def delete_item(key, scroll_container, bottom_container, middle_frame, full_data, win):
     win.destroy()
     delete_row(key, full_data)
-    handler_data(scroll_container, bottom_container, right_frame, right_frame_year, full_data)
+    handler_data(scroll_container, bottom_container, middle_frame, full_data)
 
-def rename_item(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win):
+def rename_item(key, scroll_container, bottom_container, middle_frame, full_data, win):
     win.destroy()
 
     rename_win = tk.Toplevel()
@@ -63,26 +65,26 @@ def rename_item(key, scroll_container, bottom_container, right_frame, right_fram
         full_data.clear()
         full_data.update(new_data)
         
-        handler_data(scroll_container, bottom_container, right_frame, right_frame_year, full_data)
+        handler_data(scroll_container, bottom_container, middle_frame, full_data)
         
     entry.bind("<Return>", lambda event: confirm_rename())                          # main enter
     entry.bind("<KP_Enter>", lambda event: confirm_rename())                        # second enter
     tk.Button(rename_win, text="rename", command=confirm_rename).pack(pady=10)
 
-def move_up(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win):
+def move_up(key, scroll_container, bottom_container, middle_frame, full_data, win):
     win.destroy()
     if not (full_data := move_up_row(key, full_data)):
         return
-    handler_data(scroll_container, bottom_container, right_frame, right_frame_year, full_data)
+    handler_data(scroll_container, bottom_container, middle_frame, full_data)
 
-def move_down(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win):
+def move_down(key, scroll_container, bottom_container, middle_frame, full_data, win):
     win.destroy()
     if not (full_data := move_down_row(key, full_data)):
         return
-    handler_data(scroll_container, bottom_container, right_frame, right_frame_year, full_data)
+    handler_data(scroll_container, bottom_container, middle_frame, full_data)
 
 
-def add_item(scroll_container, bottom_container, right_frame, right_frame_year, full_data):
+def add_item(scroll_container, bottom_container, middle_frame, full_data):
     add_win = tk.Toplevel()
     add_win.title("add item")
     add_win.geometry("250x100")
@@ -98,34 +100,25 @@ def add_item(scroll_container, bottom_container, right_frame, right_frame_year, 
         
         if not add_row(new_key, full_data):
             return
-        handler_data(scroll_container, bottom_container, right_frame, right_frame_year, full_data)
+        handler_data(scroll_container, bottom_container, middle_frame, full_data)
         
     entry.bind("<Return>", lambda event: confirm_add())                          # main enter
     entry.bind("<KP_Enter>", lambda event: confirm_add())                        # second enter
     tk.Button(add_win, text="add", command=confirm_add).pack(pady=10)
 
-def on_right_click(event, key, scroll_container, bottom_container, right_frame, right_frame_year, full_data):
+def on_right_click(event, key, scroll_container, bottom_container, middle_frame, full_data):
     win = tk.Toplevel()
     win.title("menu")
     win.geometry("200x120")
 
-    tk.Button(win, text="Delete", command=lambda: delete_item(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Rename", command=lambda: rename_item(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Move_up", command=lambda: move_up(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win)).pack(fill="x")
-    tk.Button(win, text="Move_down", command=lambda: move_down(key, scroll_container, bottom_container, right_frame, right_frame_year, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Delete", command=lambda: delete_item(key, scroll_container, bottom_container, middle_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Rename", command=lambda: rename_item(key, scroll_container, bottom_container, middle_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Move_up", command=lambda: move_up(key, scroll_container, bottom_container, middle_frame, full_data, win)).pack(fill="x")
+    tk.Button(win, text="Move_down", command=lambda: move_down(key, scroll_container, bottom_container, middle_frame, full_data, win)).pack(fill="x")
 
 
-
-def handler_data(scrollable_left, bottom_container, right_frame, right_frame_year, full_data):
-    # for widget in scrollable_left.winfo_children():
-    #     widget.destroy()
-    # for widget in bottom_container.winfo_children():
-    #     widget.destroy()
-    # for widget in right_frame.winfo_children():
-    #     info = widget.grid_info()
-    #     if info["row"] != 0 and info["row"] != 7:
-            # widget.destroy()
-
+def handler_data(scrollable_left, bottom_container, middle_frame, bottom_frame, full_data):
+    clear_frame(scrollable_left, bottom_container, middle_frame)
     
     list_frames_labels = []
     for row, key in enumerate(full_data):
@@ -143,7 +136,7 @@ def handler_data(scrollable_left, bottom_container, right_frame, right_frame_yea
         lbl.pack(expand=True, fill="both")
 
         if row == 0:
-            load_cal(right_frame, key, full_data, config.current_date)
+            load_cal(middle_frame, key, full_data, config.current_date)
 
         list_frames_labels.append((frame, lbl))
         def on_click(event, f=frame, l=lbl, key=key, full_data=full_data, current_date=config.current_date):
@@ -159,26 +152,28 @@ def handler_data(scrollable_left, bottom_container, right_frame, right_frame_yea
                 l.config(bg="RosyBrown")
                 config.CH_current_date = config.current_date
                 # if config.switch == 0:
-                load_cal(right_frame, key, full_data, current_date)
+                load_cal(middle_frame, key, full_data, current_date)
                 # else:
                     # load_cal_year(right_frame_year, key, full_data, current_date)
-                drop_down(right_frame, right_frame_year, full_data, current_date)
+                drop_down(middle_frame, bottom_frame, full_data, current_date)
 
         # Bind click event
         frame.bind("<Button-1>", on_click)
         lbl.bind("<Button-1>", on_click)
-        frame.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, scrollable_left, bottom_container, right_frame, right_frame_year, full_data))
-        lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, scrollable_left, bottom_container, right_frame, right_frame_year, full_data))
+        frame.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, scrollable_left, bottom_container, middle_frame, full_data))
+        lbl.bind("<Button-3>", lambda e, key=key: on_right_click(e, key, scrollable_left, bottom_container, middle_frame, full_data))
 
     add_btn = ttk.Button(
         bottom_container,
         text="Add",
-        command=lambda: add_item(scrollable_left, bottom_container, right_frame, right_frame_year, full_data)
+        command=lambda: add_item(scrollable_left, bottom_container, middle_frame, full_data)
     )
     add_btn.pack(side="bottom", fill="x", pady=5)
 
 
-def load_cal(right_frame, key, full_data, dates = None):
+def load_cal(middle_frame, key, full_data, dates = None):
+    clear_frame(middle_frame)
+    reset_grid_columns(middle_frame)
     if dates is None:
         dates = config.CH_current_date
     config.key_data = key
@@ -186,20 +181,20 @@ def load_cal(right_frame, key, full_data, dates = None):
     grid = month_grid(dates["year"], dates["month"])
     squares = []
     for row in range(1, 7):                                                     # 6 weeks
-        row_cells = []
+        # row_cells = []
         for col in range(7):
             cell = grid[row-1][col]                                                   # 7 days per week
             month_type = cell["month_type"]
             bg = get_bg_color(cell, month_type, full_data[config.key_data])
             frame = tk.Frame(
-                right_frame,
-                width=150,
+                middle_frame,
+                # width=150,
                 height=80,
                 relief="sunken" if month_type == "other" else "solid",
                 bd=2,
                 bg=bg
             )
-            frame.grid(row=row, column=col)
+            frame.grid(row=row, column=col, sticky="nsew")
             frame.pack_propagate(False)  # prevent child from resizing frame
 
             day = cell["day"]
@@ -234,11 +229,16 @@ def load_cal(right_frame, key, full_data, dates = None):
             frame.bind("<Button-1>", on_click)
             lbl.bind("<Button-1>", on_click)  # so click works on label too
 
-            row_cells.append(lbl)
-        squares.append(row_cells)
+            # row_cells.append(lbl)
+        for col in range(7):
+            middle_frame.grid_columnconfigure(col, weight=1)
+        # squares.append(row_cells)
 # ===================================================================
-def load_cal_year(right_frame_year, key, full_data, dates = None):
+def load_cal_year(middle_frame, key, full_data, dates = None):
+    clear_frame(middle_frame)
+    reset_grid_columns(middle_frame)
     print("here")
+    
     if dates is None:
         dates = config.CH_current_date
     config.key_data = key
@@ -246,85 +246,88 @@ def load_cal_year(right_frame_year, key, full_data, dates = None):
     year_prev = dates["prev_year"]
 
     grid = year_grid(year_current)
-    squares = []
-    num_weeks_prev = len(grid[str(year_current)])
-    num_weeks_current = len(grid[str(year_prev)])
-    for row in range(1, 7):                                                     # 6 weeks
-        row_cells = []
-        for col in range(7):
-            cell = grid[row-1][col]                                                   # 7 days per week
-            month_type = cell["month_type"]
-            bg = get_bg_color2(cell, month_type, full_data[config.key_data])
-            frame = tk.Frame(
-                right_frame_year,
-                width=150,
-                height=80,
-                relief="sunken" if month_type == "other" else "solid",
-                bd=2,
-                bg=bg
-            )
-            frame.grid(row=row, column=col)
-            frame.pack_propagate(False)  # prevent child from resizing frame
+    for col in range(12):
+        count_week = len(grid[col])
+        print(count_week)
+        frame_month = tk.Frame(
+            middle_frame,
+            height=150,
+            relief="sunken",
+            bd=2,
+            bg="IndianRed"
+        )
+        frame_month.grid(row=0, column=col, sticky="nsew")
+        frame_month.pack_propagate(False)
 
-            day = cell["day"]
-            lbl = tk.Label(frame,
-                text=day,
-                font=("Segoe UI", 20),
-                anchor="center",
-                bg=bg
+        # lbl = tk.Label(frame_month, text=f"Month {col+1}", font=("Segoe UI", 16), bg="IndianRed")
+        # lbl.pack(expand=True, fill="both")
+
+        for week in range(4):
+            frame_week = tk.Frame(
+                frame_month, 
+                height=150,
+                relief="sunken",
+                bd=2,
+                bg="IndianRed"
             )
-            lbl.pack(expand=True, fill="both")
+            frame_week.grid(row=0, column=col, sticky="nsew")
+            frame_week.pack_propagate(False)
+
+    for col in range(12):
+        middle_frame.grid_columnconfigure(col, weight=1)
+
 
             # Function to toggle color
-            def on_click(event, f=frame, l=lbl, c=cell, key=key, fd=full_data):
-                if f["bg"] == "GreenYellow":
-                    add_date(c, key, fd)
-                    f.config(bg="GreenYellow")
-                    l.config(bg="GreenYellow")
-                elif f["bg"] == "Silver":
-                    add_date(c, key, fd)
-                    f.config(bg="IndianRed")
-                    l.config(bg="IndianRed")
-                elif f["bg"] == "GreenYellow":
-                    delete_date(c, key, fd)
-                    f.config(bg="GreenYellow")
-                    l.config(bg="GreenYellow")
-                elif f["bg"] == "IndianRed":
-                    delete_date(c, key, fd)
-                    f.config(bg="Silver")
-                    l.config(bg="Silver")
+            # def on_click(event, f=frame, l=lbl, c=cell, key=key, fd=full_data):
+            #     if f["bg"] == "GreenYellow":
+            #         add_date(c, key, fd)
+            #         f.config(bg="GreenYellow")
+            #         l.config(bg="GreenYellow")
+            #     elif f["bg"] == "Silver":
+            #         add_date(c, key, fd)
+            #         f.config(bg="IndianRed")
+            #         l.config(bg="IndianRed")
+            #     elif f["bg"] == "GreenYellow":
+            #         delete_date(c, key, fd)
+            #         f.config(bg="GreenYellow")
+            #         l.config(bg="GreenYellow")
+            #     elif f["bg"] == "IndianRed":
+            #         delete_date(c, key, fd)
+            #         f.config(bg="Silver")
+            #         l.config(bg="Silver")
 
-            # Bind click event
-            frame.bind("<Button-1>", on_click)
-            lbl.bind("<Button-1>", on_click)  # so click works on label too
+            # # Bind click event
+            # frame.bind("<Button-1>", on_click)
+            # lbl.bind("<Button-1>", on_click)  # so click works on label too
 
-            row_cells.append(lbl)
-        squares.append(row_cells)
+            # row_cells.append(lbl)
+        # squares.append(row_cells)
 
-def on_selected(event, combo, kind, right_frame, right_frame_year, full_data):
+def on_selected(event, combo, kind, middle_frame, full_data):
     if kind == "month":
         selected_month = combo.get()
-        month_number = months.index(selected_month) + 1
+        month_number = mons.index(selected_month) + 1
         config.CH_current_date = today(config.CH_current_date["year"], month_number)
     elif kind == "year":
         selected_year = int(combo.get())
         config.CH_current_date = today(selected_year, config.CH_current_date["month"])
     
-    load_cal(right_frame, config.key_data, full_data)
+    load_cal(middle_frame, config.key_data, full_data)
 
 
 
-def drop_down(right_frame, right_frame_year, full_data, dates = None):
+def drop_down(middle_frame, bottom_frame, full_data, dates = None):
+    # clear_frame(middle_frame)
     if dates is None:
         dates = config.CH_current_date
-    month_combo = ttk.Combobox(right_frame, values=months, state="readonly", width=9)
+    month_combo = ttk.Combobox(bottom_frame, values=mons, state="readonly", width=9)
     month_combo.current(dates["month"] - 1)                                # default value
     month_combo.grid(row=0, column=3, columnspan=1, pady=10)
-    month_combo.bind("<<ComboboxSelected>>", lambda event: on_selected(event, month_combo, "month", right_frame, right_frame_year, full_data))
+    month_combo.bind("<<ComboboxSelected>>", lambda event: on_selected(event, month_combo, "month", middle_frame, full_data))
 
     years = [str(year) for year in range(dates["year"] - 10, dates["year"] + 2)]
-    year_combo = ttk.Combobox(right_frame, values=years, state="readonly", width=9)
+    year_combo = ttk.Combobox(bottom_frame, values=years, state="readonly", width=9)
     year_combo.current(years.index(str(dates["year"])))                               # default value
     year_combo.grid(row=0, column=4, columnspan=1, pady=10)
 
-    year_combo.bind("<<ComboboxSelected>>", lambda event: on_selected(event, year_combo, "year", right_frame, right_frame_year, full_data))
+    year_combo.bind("<<ComboboxSelected>>", lambda event: on_selected(event, year_combo, "year", middle_frame, full_data))

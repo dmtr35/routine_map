@@ -29,3 +29,12 @@ def make_scrollable_frame(parent):
     canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))   # Linux scroll down
 
     return scrollable_frame
+
+def reset_grid_columns(frame):
+    for col in range(frame.grid_size()[0]):
+        frame.grid_columnconfigure(col, weight=0)
+
+def clear_frame(*args):
+    for frame in args:
+        for widget in frame.winfo_children():
+            widget.destroy()

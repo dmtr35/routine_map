@@ -1,31 +1,39 @@
 import datetime, calendar
-
+from func_frames import reset_grid_columns
 import datetime
+import tkinter as tk
 
-def year_grid(year: int) -> dict[str, list[list[str]]]:
-    result = {}
-    for y in [year - 1, year]:
-        weeks = []
-        # start from Jan 1
-        start = datetime.date(y, 1, 1)
-        end = datetime.date(y, 12, 31)
 
-        # move back to Monday (ISO weekday: Monday=1, Sunday=7)
-        first_monday = start - datetime.timedelta(days=start.isoweekday() - 1)
+def year_grid(year: int) -> list[list[list[str]]]:
+    """
+    Returns a list of 12 elements (months), each month is a list of weeks,
+    each week is a list of ISO date strings.
+    Weeks are split so that no week crosses month boundaries.
+    """
+    result = [[] for _ in range(12)]  # 12 months
 
-        current = first_monday
+    for month in range(1, 13):
+        # first and last day of the month
+        start = datetime.date(year, month, 1)
+        if month == 12:
+            end = datetime.date(year, 12, 31)
+        else:
+            end = datetime.date(year, month + 1, 1) - datetime.timedelta(days=1)
+
+        # move back to Monday for the first week
+        current = start - datetime.timedelta(days=start.isoweekday() - 1)
         while current <= end:
             week = []
             for i in range(7):
                 day = current + datetime.timedelta(days=i)
-                if start <= day <= end:   # only keep days inside the year
+                if start <= day <= end:
                     week.append(day.isoformat())
-            if week:  # skip empty weeks
-                weeks.append(week)
+            if week:
+                result[month - 1].append(week)
             current += datetime.timedelta(days=7)
 
-        result[str(y)] = weeks
     return result
+
 
 
 def month_grid(year, month):
@@ -131,4 +139,28 @@ def today(year, month):
 def date(cell):
     return f"{cell['year']:04d}-{cell['month']:02d}-{cell['day']:02d}"
 
+def weekdays(top_frame):
+    reset_grid_columns(top_frame)
+    weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    for col, day in enumerate(weekdays):
+        frame = tk.Frame(top_frame, height=80, relief="solid", bd=2, bg="Teal")                                                              # border thickness
+        frame.grid(row=0, column=col, sticky="nsew")
+        frame.pack_propagate(False)
 
+        blb = tk.Label(frame, text=day, font=("segoe UI", 20), anchor="center", bg="Teal")
+        blb.pack(expand=True, fill="both")
+    for col in range(7):
+        top_frame.grid_columnconfigure(col, weight=1)
+
+def months(top_frame):
+    reset_grid_columns(top_frame)
+    mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    for col, m in enumerate(mon):
+        frame_months = tk.Frame(top_frame, height=80, relief="solid", bd=2, bg="Teal")
+        frame_months.grid(row=0, column=col, sticky="nsew")
+        frame_months.pack_propagate(False)
+
+        label_months = tk.Label(frame_months, text=m, font=("Segoe UI", 16), anchor="center", bg="Teal")
+        label_months.pack(expand=True, fill="both")
+    for col in range(12):
+        top_frame.grid_columnconfigure(col, weight=1)
